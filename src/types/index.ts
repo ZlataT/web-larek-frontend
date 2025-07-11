@@ -1,8 +1,9 @@
 //карточка товара
-export interface IProductItem  {
+export interface ICard  {
+    id: number;
     category: string;
     title: string;
-    img: string;
+    image: string;
     price: number| null;
     description?: string;
 }
@@ -30,4 +31,21 @@ export interface IBasket{
     title: string;
     price: number|null;
     count: number;
+}
+
+export interface IOrderResult {
+    id: string;
+    total: number;
+}
+
+//для запроса каталога товаров
+export interface IProductListResponse {
+    map(createCard: (product: ICard) => HTMLElement): unknown;
+    total: number;    // Общее количество товаров
+    items: ICard[]; // Массив товаров
+}
+
+export interface ISuccess{
+    id: string;
+	total: number;
 }
