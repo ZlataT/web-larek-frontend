@@ -4,7 +4,7 @@ import { Card } from './components/card';
 import { LarekApi } from './components/LarekApi';
 import './scss/styles.scss';
 import { ICard, IProductListResponse } from './types';
-import { CDN_URL } from './utils/constants';
+import { API_URL, CDN_URL } from './utils/constants';
 import { ensureElement } from './utils/utils';
 
 //все шаблоны 
@@ -16,7 +16,6 @@ const events = new EventEmitter();
 const modalContainer = ensureElement<HTMLElement>('#modal-container');
 const modal = new Modal(modalContainer, events);
 
-const API_URL = 'https://larek-api.nomoreparties.co';
 
 // Инициализация системы событий
 

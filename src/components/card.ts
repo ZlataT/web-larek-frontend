@@ -49,16 +49,8 @@ export class Card<T> extends Component<ICard> {
         this.setImage(this._image, value, this.title)
     }
 
-    set description(value: string | string[]) {
-        if (Array.isArray(value)) {
-            this._description.replaceWith(...value.map(str => {
-                const descTemplate = this._description.cloneNode() as HTMLElement;
-                this.setText(descTemplate, str);
-                return descTemplate;
-            }));
-        } else {
+    set description(value: string) {
             this.setText(this._description, value);
-        }
     }
 
     set price(value: number | null) {
