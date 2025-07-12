@@ -1,6 +1,6 @@
 //карточка товара
 export interface ICard  {
-    id: number;
+    id: string;
     category: string;
     title: string;
     image: string;

@@ -1,7 +1,8 @@
-import { IBasket } from "../types";
+import { IBasket, ICard } from "../types";
 import { ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
 import { IEvents } from "./base/events";
+import { CardBasket } from "./card";
 
 
 export class Basket extends Component<IBasket>{
@@ -15,8 +16,6 @@ export class Basket extends Component<IBasket>{
         this._list = ensureElement<HTMLElement>(`.${blockName}__list`,this.container);
         this._total = ensureElement<HTMLElement>(`.${blockName}__total`,this.container);
     }
-    
-    set 
 
     set selected(items: string[]) {
         if (items.length) {
@@ -29,35 +28,22 @@ export class Basket extends Component<IBasket>{
     set total(total: number) {
         this.setText(this._total, `${total} синапсов`);
     }
-}
 
-export class BasketCreator {
-    private readonly template: HTMLTemplateElement;
-    private readonly showProductModal: (basketData: IBasket) => void;
+    set button(value: string) {
+		this.setText(this._button, value);
+	}
 
-    constructor(
-        template: HTMLTemplateElement,
-        modalHandler: (basketData: IBasket) => void = (basketData) => console.log('Selected product:', product)
-    ) {
-        this.template = template;
-        this.showProductModal = modalHandler;
-    }
+    set items(items:ICard[]){
+        const item = items.map((item,index) =>{
+            const card = new CardBasket(this._list,(id: string) => (event: MouseEvent) => {})
+            card.title = item.title;
+            card.price = item.price;
+            card.index = index + 1;
+            card.id = item.id;
 
-    public createBasket(basketData: IBasket): HTMLElement {
-        // Клонируем шаблон
-        const basketElement = cloneTemplate<HTMLElement>(this.template);
-
-        // Создаем экземпляр карточки
-        const basket = new Basket('basket', basketElement, {
-            onClick: () => this.showProductModal(basketData)
+            return card.render();
         });
-        this.populateCardData(basket, basketData);
 
-        return basketElement;
-    }
-
-    private populateCardData(basket: Basket, basketData: IBasket): void {
-        basket.total = basketData.total;
-        basket.list = basketData.list;
+        this._list.replaceChildren(...item);
     }
 }

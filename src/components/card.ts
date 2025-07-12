@@ -2,7 +2,7 @@ import { ICard, ICardAction } from "../types";
 import { ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
 
-export class Card<T> extends Component<ICard> {
+export class Card extends Component<ICard> {
     protected _category: HTMLElement;
     protected _title: HTMLElement;
     protected _image: HTMLImageElement;
@@ -67,6 +67,7 @@ export class Card<T> extends Component<ICard> {
 
     set category(value: string) {
         this.setText(this._category, value);
+        this.removeClass(this._category,'card__category_soft');
         switch(value){
             case 'софт-скил':{
                 this.addClass(this._category,'card__category_soft');
@@ -75,26 +76,75 @@ export class Card<T> extends Component<ICard> {
 
             case 'другое':{
                 this.addClass(this._category,'card__category_other');
-                this.removeClass(this._category,'card__category_soft');
+                
                 break;
             }
 
             case 'дополнительное':{
                 this.addClass(this._category,'card__category_additional');
-                this.removeClass(this._category,'card__category_soft');
                 break;
             }
 
             case 'кнопка':{
                 this.addClass(this._category,'card__category_button');
-                this.removeClass(this._category,'card__category_soft');
                 break;
             }
             case 'хард-скил':{
                 this.addClass(this._category,'card__category_hard');
-                this.removeClass(this._category,'card__category_soft');
                 break;
             }
         }
     }
+}
+
+export class CardBasket extends Component<ICard>{
+    protected _itemIndex: HTMLElement;
+    protected _title: HTMLElement;
+    protected _price:HTMLElement;
+    protected _button?: HTMLButtonElement;
+    protected _id: string;
+
+    constructor(container: HTMLElement, deleteAction: (id: string) => (event: MouseEvent) => void) {
+        super(container);
+
+        this._title = ensureElement<HTMLElement>('.card__title', container);
+        this._button = container.querySelector('.basket__item-delete');
+        this._price = container.querySelector('.card__price');
+        this._itemIndex = container.querySelector('.basket__item-index');
+        this._button.addEventListener('click', deleteAction(this._id));
+    }
+
+    set id(id: string) {
+       this._id = id;
+    }
+
+    get id(): string {
+        return this._id;
+    }
+
+    set title(value: string) {
+        this.setText(this._title, value);
+        
+    }
+
+    get title(): string {
+        return this._title.textContent || '';
+    }
+
+    set price(value: number | null) {
+		if (value !== null) {
+			this.setText(this._price, `${value} синапсов`);
+		} else {
+			this.setText(this._price, 'Бесценно');
+			if (this._button) {
+				this._button.disabled = true;
+			}
+		}
+	}
+
+    set index(value: number | null) {
+		if (value !== null) {
+			this.setText(this._itemIndex, value);
+		} 
+	}
 }

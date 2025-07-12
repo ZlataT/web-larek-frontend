@@ -29,7 +29,7 @@ export class CardCreator {
         return cardElement;
     }
 
-    private populateCardData(card: Card<ICard>, product: ICard): void {
+    private populateCardData(card: Card, product: ICard): void {
         card.title = product.title;
         card.price = product.price;
         card.category = product.category;
