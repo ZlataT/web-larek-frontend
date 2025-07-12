@@ -39,6 +39,7 @@ export class Card<T> extends Component<ICard> {
 
     set title(value: string) {
         this.setText(this._title, value);
+        
     }
 
     get title(): string {
@@ -50,7 +51,7 @@ export class Card<T> extends Component<ICard> {
     }
 
     set description(value: string) {
-            this.setText(this._description, value);
+        this.setText(this._description, value);
     }
 
     set price(value: number | null) {
@@ -66,6 +67,34 @@ export class Card<T> extends Component<ICard> {
 
     set category(value: string) {
         this.setText(this._category, value);
+        switch(value){
+            case 'софт-скил':{
+                this.addClass(this._category,'card__category_soft');
+                break;
+            }
 
+            case 'другое':{
+                this.addClass(this._category,'card__category_other');
+                this.removeClass(this._category,'card__category_soft');
+                break;
+            }
+
+            case 'дополнительное':{
+                this.addClass(this._category,'card__category_additional');
+                this.removeClass(this._category,'card__category_soft');
+                break;
+            }
+
+            case 'кнопка':{
+                this.addClass(this._category,'card__category_button');
+                this.removeClass(this._category,'card__category_soft');
+                break;
+            }
+            case 'хард-скил':{
+                this.addClass(this._category,'card__category_hard');
+                this.removeClass(this._category,'card__category_soft');
+                break;
+            }
+        }
     }
 }

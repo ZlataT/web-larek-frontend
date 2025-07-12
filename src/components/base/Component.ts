@@ -20,6 +20,20 @@ export abstract class Component<T> {
         }
     }
 
+    //удалить класс  
+    removeClass(element:HTMLElement, className: string){
+        if(element){
+        element.classList.remove(className);  
+        }   
+    }
+
+    //добавить класс
+    addClass(element:HTMLElement, className: string){
+        if(element){
+        element.classList.add(className);  
+        }      
+    }
+
     // Сменить статус блокировки
     setDisabled(element: HTMLElement, state: boolean) {
         if (element) {

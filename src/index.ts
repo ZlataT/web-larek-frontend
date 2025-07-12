@@ -1,63 +1,38 @@
 import { EventEmitter } from './components/base/events';
 import { Modal } from './components/base/Modal';
+import { Basket } from './components/basket';
 import { Card } from './components/card';
+import { CardCreator } from './components/cardPreiwe';
 import { LarekApi } from './components/LarekApi';
+ // Импортируем наш класс
 import './scss/styles.scss';
 import { ICard, IProductListResponse } from './types';
 import { API_URL, CDN_URL } from './utils/constants';
 import { ensureElement } from './utils/utils';
 
-//все шаблоны 
-
+//все шаблоны
+const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
+const modalContainer = ensureElement<HTMLTemplateElement>('#modal-container');
+const modalBasket = ensureElement<HTMLTemplateElement>('#basket');
 // Инициализация системы событий
 const events = new EventEmitter();
 
 // Создаем модальное окно
-const modalContainer = ensureElement<HTMLElement>('#modal-container');
 const modal = new Modal(modalContainer, events);
 
+//экземпляр корзины
 
-// Инициализация системы событий
 
 // Инициализация API
 const api = new LarekApi(CDN_URL, API_URL);
 
+// Создаем экземпляр CardCreator
+const cardCreator = new CardCreator(
+    cardCatalogTemplate,
+    (product) => showProductModal(product) // Передаем обработчик открытия модалки
+);
 
-// Получаем список товаров
-api.getProductList()
-    .then((products) => {
-        // Добавляем карточки на страницу
-        const gallery = ensureElement<HTMLElement>('.gallery');
-        const cards = products.map(createCard);
-        gallery.replaceChildren(...cards);
-    })
-    .catch((err) => {
-        console.error('Ошибка при загрузке товаров:', err);
-    });
-
-// Функция создания карточки
-function createCard(product: ICard): HTMLElement {
-    const template = document.getElementById('card-catalog') as HTMLTemplateElement;
-    const cardElement = template.content.cloneNode(true) as HTMLElement;
-    const cardContainer = cardElement.firstElementChild as HTMLElement;
-    
-    const card = new Card('card', cardContainer, {
-        onClick: () => {
-            // При клике открываем модалку с этим товаром
-            showProductModal(product);
-        }
-    });
-    
-    // Заполняем данными
-    card.title = product.title;
-    card.price = product.price;
-    card.category = product.category;
-    card.image = product.image;
-    
-    return cardContainer;
-}
-
-// Функция показа модалки с товаром
+// Функция показа модалки с товаром (оставляем как есть)
 function showProductModal(product: ICard) {
     const previewTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
     const previewElement = previewTemplate.content.cloneNode(true) as HTMLElement;
@@ -73,5 +48,14 @@ function showProductModal(product: ICard) {
     modal.open();
 }
 
-// Добавляем карточки на страницу
-
+// Получаем список товаров
+api.getProductList()
+    .then((products) => {
+        // Используем CardCreator для создания карточек
+        const gallery = ensureElement<HTMLElement>('.gallery');
+        const cards = cardCreator.createCards(products); // Используем метод класса
+        gallery.replaceChildren(...cards);
+    })
+    .catch((err) => {
+        console.error('Ошибка при загрузке товаров:', err);
+    });
