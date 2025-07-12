@@ -8,12 +8,12 @@ interface IPage {
     locked: boolean;
 }
 
+// Отвечает за блокировку скролла, кнопку корзины и за список товара
 export class Page extends Component<IPage> {
     protected _counter: HTMLElement;
     protected _gallery: HTMLElement;
     protected _wrapper: HTMLElement;
     protected _basket: HTMLElement;
-
 
     constructor(container: HTMLElement, protected events: IEvents) {
         super(container);
