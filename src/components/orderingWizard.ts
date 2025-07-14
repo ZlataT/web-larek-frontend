@@ -15,6 +15,9 @@ export class Step1 extends Form<IOrder> {
         this._cardButton = ensureElement<HTMLButtonElement>(`.button[name='card']`, container);
         this._cashButton = ensureElement<HTMLButtonElement>(`.button[name='cash']`, container);
 
+        // От нас хотят чтобы кнопка вела себя как радио-кнопка
+        // Значит нужно руками самостоятельно её фиксировать в нажатом положении
+        // И самостоятельно отправлять данные на валидацию
         this._cardButton.addEventListener('click', (e: MouseEvent) => {
             this.addClass(this._cardButton, 'button_alt-active');
             this.removeClass(this._cashButton, 'button_alt-active');

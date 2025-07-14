@@ -54,15 +54,8 @@ events.on('product:preview', (product: IProduct) => {
     // Coздаём карточку по шаблону и добавляем в корзину при клике
     const card = new Card(
         cloneTemplate(cardPreviewTemplate),
-        () => {
-            appState.addToBasket(product);
-            card.disableButton();
-        },
+        () => appState.addToBasket(product),
     );
-
-    if (appState.basket.contents.includes(product)){
-        card.disableButton();
-    }
     // Рендерим карточку и результат вставляем в модалку
     modal.content = card.render({
         image: product.image,

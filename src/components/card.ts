@@ -5,6 +5,7 @@ import { Component } from "./base/Component";
 export class Card extends Component<IProduct> {
     protected _title: HTMLElement;
     protected _price: HTMLElement;
+
     protected _basketIndex: HTMLElement;
     protected _category?: HTMLElement;
     protected _image?: HTMLImageElement;
@@ -100,9 +101,5 @@ export class Card extends Component<IProduct> {
                 break;
             }
         }
-    }
-
-    disableButton() {
-        this.setDisabled(this._button, true);
     }
 }
