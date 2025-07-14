@@ -54,8 +54,15 @@ events.on('product:preview', (product: IProduct) => {
     // Coздаём карточку по шаблону и добавляем в корзину при клике
     const card = new Card(
         cloneTemplate(cardPreviewTemplate),
-        () => appState.addToBasket(product),
+        () => {
+            appState.addToBasket(product);
+            card.disableButton();
+        },
     );
+
+    if (appState.basket.contents.includes(product)){
+        card.disableButton();
+    }
     // Рендерим карточку и результат вставляем в модалку
     modal.content = card.render({
         image: product.image,
@@ -130,6 +137,10 @@ events.on('wizard:close', () => {
     appState.clearBasket();
     appState.clearOrder();
 });
+
+    events.on('order:input', (data:object) => {
+        appState.upDateOrder(data.field, data.value)
+    });
 
 // ЗАПУСК ПРИЛОЖЕНИЯ
 // Получаем список товаров

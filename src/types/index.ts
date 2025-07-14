@@ -26,3 +26,8 @@ export interface ISuccess {
     id: string;
 	total: number;
 }
+
+export type FormUpdate = {
+    field: string;
+    value: any;
+}

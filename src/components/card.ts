@@ -102,4 +102,8 @@ export class Card extends Component<IProduct> {
             }
         }
     }
+    
+    disableButton() {
+        this.setDisabled(this._button, true);
+    }
 }

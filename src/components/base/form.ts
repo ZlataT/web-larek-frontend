@@ -11,7 +11,7 @@ export abstract class Form<T> extends Component<IFormState> {
 	protected _submit: HTMLButtonElement;
 	protected _errors: HTMLElement;
 
-	constructor(protected container: HTMLFormElement, protected events: IEvents, protected _formData: T) {
+	constructor(protected container: HTMLFormElement, protected events: IEvents, protected _formName: string) {
 		super(container as HTMLFormElement);
 		// Для всех форм сразу у нас есть кнопка отправить и список ошибок
 		this._submit = ensureElement<HTMLButtonElement>('.button[type=submit]', container);
@@ -27,13 +27,13 @@ export abstract class Form<T> extends Component<IFormState> {
 			const target = e.target as HTMLInputElement;
 			const field = target.name as keyof T; 
 			const value = target.value;
-			this.onInput(field as string, value);
+			this.events.emit(`${_formName}:input`, {field, value});
 		});
 
 		this.container.addEventListener('submit', (e: Event) => {
 			// Это нужно чтобы страница не перезагрузилась
 			e.preventDefault();
-			this.onSubmit();
+			this.events.emit(`${_formName}:submit`);
 		});
 	}
 
@@ -44,10 +44,6 @@ export abstract class Form<T> extends Component<IFormState> {
 	set errors(value: string) {
 		this.setText(this._errors, value);
 	}
-
-	abstract onInput(field: string, value: string): void;
-
-	abstract onSubmit(): void;
 
 	// Этот тип означает, что дата является суммой какой-то части типа Т и всего типа АйФормСтейт
 	// то есть в ней будут все поля АйФормСтейт, но только некоторые из Т
