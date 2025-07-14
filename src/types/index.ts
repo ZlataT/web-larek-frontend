@@ -1,10 +1,19 @@
-export interface IProduct  {
+export interface IProduct {
     id: string;
     category: string;
     title: string;
     image: string;
     price: number | null;
     description?: string;
+}
+
+export type IProductResponse = {
+    products: IProduct[];
+}
+
+export type ValidationResult = {
+    valid: boolean;
+    errors: string;
 }
 
 export interface IBasket {

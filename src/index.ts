@@ -2,12 +2,12 @@ import { AppState } from './components/AppState';
 import { EventEmitter } from './components/base/events';
 import { Modal } from './components/base/Modal';
 import { Basket } from './components/Basket';
-import { Card } from './components/Card';
+import { Card } from './components/card';
 import { LarekApi } from './components/LarekApi';
-import { Step1, Step2, Step3 } from './components/orderingWizard';
-import { Page } from './components/Page';
+import { Contacts, Order, Success } from './components/orderingWizard';
+import { Page } from './components/page';
 import './scss/styles.scss';
-import { IProduct, ISuccess } from './types';
+import { FormUpdate, IOrder, IProduct, IProductResponse, ISuccess, ValidationResult } from './types';
 import { API_URL, CDN_URL } from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
 
@@ -36,9 +36,9 @@ const modalContainer = ensureElement<HTMLElement>('#modal-container');
 const modal = new Modal(modalContainer, events);
 // Создаём неизменные (статичные) компоненты странички - корзину и три шага мастера заказа
 const basket = new Basket(cloneTemplate(basketTemplate), events);
-const wizardStep1 = new Step1(cloneTemplate(orderTemplate), events, appState.order);
-const wizardStep2 = new Step2(cloneTemplate(contactsTemplate), events, appState.order);
-const wizardStep3 = new Step3(cloneTemplate(successTemplate), events);
+const wizardOrder = new Order(cloneTemplate(orderTemplate), events);
+const wizardContacts = new Contacts(cloneTemplate(contactsTemplate), events);
+const wizardSuccess = new Success(cloneTemplate(successTemplate), events);
 
 // ОБРАБОТКА СОБЫТИЙ
 // Блокируем прокрутку страницы если открыта модалка
@@ -48,6 +48,25 @@ events.on('modal:open', () => {
 // Разблокируем прокрутку
 events.on('modal:close', () => {
 	page.locked = false;
+});
+events.on('products:changed', () => {
+     // Преобразуем ответ АПИ в карточки и результат вставляем в страничку
+    page.catalog = appState.products.map(product => {
+        // Coздаём карточку по шаблону и ставим событие product:preview на клик
+        const card = new Card(
+            cloneTemplate(cardCatalogTemplate),
+            () => events.emit('product:preview', product)
+        );
+        // Рендерим карточку
+        return card.render({
+            image: product.image,
+            category: product.category,
+            title: product.title,
+            price: product.price,
+        });
+    });
+    // Рендерим страницу
+    page.render();
 });
 // Открытие превью продукта
 events.on('product:preview', (product: IProduct) => {
@@ -103,66 +122,71 @@ function buildBasket() {
     page.counter = appState.basket.contents.length;
 }
 // Переход от корзины к мастеру заказа
-events.on('basket:order', () => {
+events.on('basket:submit', () => {
     // Рендерим первый шаг мастера заказа
-    modal.content = wizardStep1.render(appState.orderFormState);
+    modal.content = wizardOrder.render({});
     modal.open();
 });
 // Переход от 1 ко 2 шагу заказа
-events.on('wizard:toStep2', () => {
+events.on('order:submit', () => {
     // Рендерим второй шаг мастера заказа
-    modal.content = wizardStep2.render(appState.orderFormState);
+    modal.content = wizardContacts.render({});
     modal.open();
 })
 // Отправка заказа
-events.on('wizard:submit', () => {
-    appState.order.total = appState.basket.total;
-    appState.order.items = appState.basket.contents.map(item => item.id);
-    api.placeOrder(appState.order)
+events.on('contacts:submit', () => {
+    const requestData: IOrder = {
+        ...appState.order,
+        total: appState.basket.total,
+        items: appState.basket.contents.map(item => item.id),
+    };
+    api.placeOrder(requestData)
         .then((value: ISuccess) => {
-            // Рендерим третий шаг мастера заказа с учётом списанных средств
-            modal.content = wizardStep3.render({
-                total: value.total,
-            });
-            modal.open();
+            events.emit('api:placedOrder', value);
         })
         .catch((err) => {
             console.error('Ошибка при отправке заказа:', err);
         });
-})
+});
 // Закрытие мастера заказа
-events.on('wizard:close', () => {
+events.on('success:submit', () => {
     modal.close();
+});
+
+events.on('api:placedOrder', (responseData: ISuccess) => {
+    // Рендерим третий шаг мастера заказа с учётом списанных средств
+    modal.content = wizardSuccess.render({
+        total: responseData.total,
+    });
+    modal.open();
     // Заказ успешно отправлен - очищаем корзину и данные заказа
     appState.clearBasket();
     appState.clearOrder();
 });
 
-    events.on('order:input', (data:object) => {
-        appState.upDateOrder(data.field, data.value)
-    });
+// Помещаем данные заказа в модель
+events.on('order:input', (data: FormUpdate) => {
+    appState.updateOrder(data.field, data.value);
+});
+// Помещаем данные заказа в модель
+events.on('contacts:input', (data: FormUpdate) => {
+    appState.updateContacts(data.field, data.value);
+});
+
+events.on('order:changed', (data: ValidationResult) => {
+    wizardOrder.errors = data.errors;
+    wizardOrder.valid = data.valid;
+});
+events.on('contacts:changed', (data: ValidationResult) => {
+    wizardContacts.errors = data.errors;
+    wizardContacts.valid = data.valid;
+});
 
 // ЗАПУСК ПРИЛОЖЕНИЯ
 // Получаем список товаров
 api.getProductList()
-    .then((products) => {
-        // Преобразуем ответ АПИ в карточки и результат вставляем в страничку
-        page.catalog = products.map(product => {
-            // Coздаём карточку по шаблону и ставим событие product:preview на клик
-            const card = new Card(
-                cloneTemplate(cardCatalogTemplate),
-                () => events.emit('product:preview', product)
-            );
-            // Рендерим карточку
-            return card.render({
-                image: product.image,
-                category: product.category,
-                title: product.title,
-                price: product.price,
-            });
-        });
-        // Рендерим страницу
-        page.render();
+    .then((response: IProductResponse) => {
+        appState.updateProducts(response.products);
     })
     .catch((err) => {
         console.error('Ошибка при загрузке товаров:', err);

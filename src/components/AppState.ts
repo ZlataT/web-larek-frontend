@@ -2,25 +2,23 @@ import { IBasket, IOrder, IProduct } from '../types';
 import { IEvents } from './base/events';
 import { IFormState } from './base/form';
 
-const emptyFormState: IFormState = {
-	valid: false,
-	errors: [],
-};
-
 // Хранилище данных приложения
 // Здесь находятся данные, которые доступны сразу нескольким частям приложения
 export class AppState {
+	products: IProduct[];
 	basket: IBasket = {
 		contents: [],
 		total: 0,
 	};
-	// Это необходимо, чтобы сделать копию пустого объекта
-	// То есть чтобы у нас сохранялся пустой объект emptyFormState,
-	// который мы можем потом заново использовать и не создавать новый пустой объект
-	orderFormState: IFormState = Object.create(emptyFormState);
+	orderFormState: IFormState = {};
 	order: IOrder = {};
 
 	constructor(protected events: IEvents) {}
+
+	updateProducts(products: IProduct[]) {
+		this.products = products;
+		this.events.emit('products:changed');
+	}
 
 	// Каждый раз когда содержимое корзины меняется нам нужно обновить отображение корзины
 	// Это мы делаем, как и всё остальное, с помощью событий
@@ -40,18 +38,19 @@ export class AppState {
 
 	clearBasket() {
 		this.basket.contents = [];
+		this.basket.total = 0;
 		this.events.emit('basket:changed');
 	}
 
 	clearOrder() {
-		this.order = Object.create(emptyFormState);
+		this.order = {};
+		this.orderFormState = {};
 	}
 
-	upDateOrder(field: string, value: any) {
-
+	updateOrder(field: string, value: any) {
         let errors = '';
         let valid = true;
-
+	
 		switch (field) {
 			case 'address': {
 				if (value.length === 0) {
@@ -71,6 +70,16 @@ export class AppState {
 				}
 				break;
 			}
+		}
+
+        this.events.emit('order:changed', { errors, valid });
+	}
+
+	updateContacts(field: string, value: any) {
+        let errors = '';
+        let valid = true;
+	
+		switch (field) {
 			case 'email': {
 				if (value.length === 0) {
 					errors = 'Необходимо указать почту';
@@ -91,8 +100,6 @@ export class AppState {
 			}
 		}
 
-        if (!valid){
-            this.events.emit('order:invalid', {errors});
-        }
+        this.events.emit('contacts:changed', { errors, valid });
 	}
 }

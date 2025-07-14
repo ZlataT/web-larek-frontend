@@ -1,4 +1,4 @@
-import { IBasket, IProduct } from "../types";
+import { IBasket } from "../types";
 import { ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
 import { IEvents } from "./base/events";
@@ -16,7 +16,7 @@ export class Basket extends Component<IBasket> {
         this._button = ensureElement<HTMLButtonElement>(`.basket__button`, container);
 
         // Для управления приложением мы используем систему событий
-        this._button.addEventListener('click', event => events.emit('basket:order'));
+        this._button.addEventListener('click', event => events.emit('basket:submit'));
     }
 
     set total(value: number) {

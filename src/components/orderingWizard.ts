@@ -5,7 +5,7 @@ import { IEvents } from "./base/events";
 import { Form } from "./base/form";
 
 // Первый шаг в мастере заказа - метод оплаты и адрес
-export class Step1 extends Form<IOrder> {
+export class Order extends Form<IOrder> {
     protected _cardButton: HTMLButtonElement;
     protected _cashButton: HTMLButtonElement;
 
@@ -21,27 +21,27 @@ export class Step1 extends Form<IOrder> {
         this._cardButton.addEventListener('click', (e: MouseEvent) => {
             this.addClass(this._cardButton, 'button_alt-active');
             this.removeClass(this._cashButton, 'button_alt-active');
-            this.events.emit('order:input', {field:'payment', value:'card'});
+            this.events.emit('order:input', { field:'payment', value:'card' });
         });
 
         this._cashButton.addEventListener('click', (e: MouseEvent) => {
             this.addClass(this._cashButton, 'button_alt-active');
             this.removeClass(this._cardButton, 'button_alt-active');
-            this.events.emit('order:input', {field:'payment', value:'cash'});
+            this.events.emit('order:input', { field:'payment', value:'cash' });
         });
     }
 
 }
 
 // Второй шаг в мастере заказа - почта и телефон
-export class Step2 extends Form<IOrder> {
+export class Contacts extends Form<IOrder> {
 	constructor(container: HTMLFormElement, protected events: IEvents) {
-        super(container, events, 'order');
+        super(container, events, 'contacts');
     }
 }
 
 // Третий шаг в мастере заказа - доклад об успешной отправке заказа
-export class Step3 extends Component<ISuccess> {
+export class Success extends Component<ISuccess> {
     protected _button: HTMLButtonElement;
     protected _total: HTMLElement;
 
@@ -52,7 +52,7 @@ export class Step3 extends Component<ISuccess> {
         this._total = ensureElement<HTMLElement>(`.order-success__description`, container);
 
         this._button.addEventListener('click', (e: MouseEvent) => {
-            events.emit('wizard:close');
+            events.emit('success:submit');
         });
     }
 

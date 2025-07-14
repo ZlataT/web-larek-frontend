@@ -1,10 +1,10 @@
+import { FormUpdate } from "../../types";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "./Component";
 import { IEvents } from "./events";
 
 export interface IFormState {
-	valid: boolean;
-	errors: string[];
+    [field: string]: string
 }
 
 export abstract class Form<T> extends Component<IFormState> {
@@ -27,7 +27,7 @@ export abstract class Form<T> extends Component<IFormState> {
 			const target = e.target as HTMLInputElement;
 			const field = target.name as keyof T; 
 			const value = target.value;
-			this.events.emit(`${_formName}:input`, {field, value});
+			this.events.emit(`${_formName}:input`, { field, value } as FormUpdate );
 		});
 
 		this.container.addEventListener('submit', (e: Event) => {
