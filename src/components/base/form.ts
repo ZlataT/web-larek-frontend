@@ -4,7 +4,13 @@ import { Component } from "./Component";
 import { IEvents } from "./events";
 
 export interface IFormState {
-    [field: string]: string
+    errors: string[];
+    valid: boolean;
+}
+
+export const defaultFormState: IFormState = {
+	errors: [], 
+	valid: false,
 }
 
 export abstract class Form<T> extends Component<IFormState> {
@@ -41,8 +47,8 @@ export abstract class Form<T> extends Component<IFormState> {
         this.setDisabled(this._submit, !value);
 	}
 
-	set errors(value: string) {
-		this.setText(this._errors, value);
+	set errors(value: string[]) {
+		this.setText(this._errors, value.join(', '));
 	}
 
 	// Этот тип означает, что дата является суммой какой-то части типа Т и всего типа АйФормСтейт

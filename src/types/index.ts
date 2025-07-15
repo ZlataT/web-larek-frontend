@@ -11,11 +11,6 @@ export type IProductResponse = {
     products: IProduct[];
 }
 
-export type ValidationResult = {
-    valid: boolean;
-    errors: string;
-}
-
 export interface IBasket {
     total: number;
     contents: IProduct[];

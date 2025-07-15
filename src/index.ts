@@ -1,5 +1,6 @@
 import { AppState } from './components/AppState';
 import { EventEmitter } from './components/base/events';
+import { defaultFormState, IFormState } from './components/base/form';
 import { Modal } from './components/base/Modal';
 import { Basket } from './components/Basket';
 import { Card } from './components/card';
@@ -7,7 +8,7 @@ import { LarekApi } from './components/LarekApi';
 import { Contacts, Order, Success } from './components/orderingWizard';
 import { Page } from './components/page';
 import './scss/styles.scss';
-import { FormUpdate, IOrder, IProduct, IProductResponse, ISuccess, ValidationResult } from './types';
+import { FormUpdate, IOrder, IProduct, IProductResponse, ISuccess } from './types';
 import { API_URL, CDN_URL } from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
 
@@ -92,17 +93,13 @@ events.on('product:preview', (product: IProduct) => {
     });
     modal.open();
 });
-// Открытие корзины - собираем корзину и открываем модалку
+// Открытие корзины - Рендерим корзину и результат вставляем в модалку
 events.on('basket:open', () => {
-    buildBasket();
-    // Рендерим корзину и результат вставляем в модалку
     modal.content = basket.render();
     modal.open();
 });
 // Содержимое корзины изменилось - пересобираем корзину
-events.on('basket:changed', () => buildBasket());
-// Вспомогательная функция - собираем корзину, но пока не открываем модалку
-function buildBasket() {
+events.on('basket:changed', () => {
     // Преобразуем продукты в карточки и результат вставляем в корзину
     basket.productCards = appState.basket.contents.map((product, index) => {
         // Coздаём карточку по шаблону и удаляем из корзины при клике
@@ -120,17 +117,17 @@ function buildBasket() {
     // Устанавливаем сумму и количество позиций в корзине и на странице
     basket.total = appState.basket.total;
     page.counter = appState.basket.contents.length;
-}
+});
 // Переход от корзины к мастеру заказа
 events.on('basket:submit', () => {
     // Рендерим первый шаг мастера заказа
-    modal.content = wizardOrder.render({});
+    modal.content = wizardOrder.render(defaultFormState);
     modal.open();
 });
 // Переход от 1 ко 2 шагу заказа
 events.on('order:submit', () => {
     // Рендерим второй шаг мастера заказа
-    modal.content = wizardContacts.render({});
+    modal.content = wizardContacts.render(defaultFormState);
     modal.open();
 })
 // Отправка заказа
@@ -173,13 +170,18 @@ events.on('contacts:input', (data: FormUpdate) => {
     appState.updateContacts(data.field, data.value);
 });
 
-events.on('order:changed', (data: ValidationResult) => {
-    wizardOrder.errors = data.errors;
-    wizardOrder.valid = data.valid;
+events.on('order:changed', () => {
+    appState.validateOrder();
 });
-events.on('contacts:changed', (data: ValidationResult) => {
-    wizardContacts.errors = data.errors;
-    wizardContacts.valid = data.valid;
+events.on('order:validated', (data: IFormState) => {
+    wizardOrder.render(data);
+});
+
+events.on('contacts:changed', () => {
+    appState.validateContacts();
+});
+events.on('contacts:validated', (data: IFormState) => {
+    wizardContacts.render(data);
 });
 
 // ЗАПУСК ПРИЛОЖЕНИЯ

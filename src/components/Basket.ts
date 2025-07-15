@@ -17,6 +17,8 @@ export class Basket extends Component<IBasket> {
 
         // Для управления приложением мы используем систему событий
         this._button.addEventListener('click', event => events.emit('basket:submit'));
+
+        this.clear();
     }
 
     set total(value: number) {
@@ -29,8 +31,12 @@ export class Basket extends Component<IBasket> {
             this._productCards.replaceChildren(...cards);
             this.setDisabled(this._button, false);
         } else {
-            this.setText(this._productCards, 'Корзина пуста');
-            this.setDisabled(this._button, true);
+            this.clear();
         }
+    }
+
+    clear() {
+        this.setText(this._productCards, 'Корзина пуста');
+        this.setDisabled(this._button, true);
     }
 }

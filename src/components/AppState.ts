@@ -10,7 +10,6 @@ export class AppState {
 		contents: [],
 		total: 0,
 	};
-	orderFormState: IFormState = {};
 	order: IOrder = {};
 
 	constructor(protected events: IEvents) {}
@@ -44,62 +43,59 @@ export class AppState {
 
 	clearOrder() {
 		this.order = {};
-		this.orderFormState = {};
 	}
 
-	updateOrder(field: string, value: any) {
-        let errors = '';
-        let valid = true;
-	
+	updateOrder(field: string, value: any) {	
 		switch (field) {
 			case 'address': {
-				if (value.length === 0) {
-					errors = 'Необходимо указать адрес';
-					valid = false;
-				} else {
-					this.order.address = value;
-				}
+				this.order.address = value;
 				break;
 			}
 			case 'payment': {
-				if (!value) {
-					errors = 'Необходимо указать способ оплаты';
-					valid = false;
-				} else {
-					this.order.payment = value;
-				}
+				this.order.payment = value;
 				break;
 			}
 		}
 
-        this.events.emit('order:changed', { errors, valid });
+        this.events.emit('order:changed');
+	}
+	
+	validateOrder() {
+		let errors: string[] = [];
+		if (!this.order.address) {
+			errors.push('Необходимо указать адрес');
+		}
+		if (!this.order.payment) {
+			errors.push('Необходимо указать способ оплаты');
+		}
+
+        this.events.emit('order:validated', { errors, valid: errors.length === 0 } as IFormState);
 	}
 
 	updateContacts(field: string, value: any) {
-        let errors = '';
-        let valid = true;
-	
 		switch (field) {
 			case 'email': {
-				if (value.length === 0) {
-					errors = 'Необходимо указать почту';
-					valid = false;
-				} else {
-					this.order.email = value;
-				}
+				this.order.email = value;
 				break;
 			}
 			case 'phone': {
-				if (value.length < 10) {
-					errors = 'Необходимо указать телефон';
-					valid = false;
-				} else {
-					this.order.phone = value;
-				}
+				this.order.phone = value;
 				break;
 			}
 		}
 
-        this.events.emit('contacts:changed', { errors, valid });
+        this.events.emit('contacts:changed');
+	}
+
+	validateContacts() {
+		let errors: string[] = [];
+		if (!this.order.email) {
+			errors.push('Необходимо указать почту');
+		}
+		if (!(this.order.phone && this.order.phone.length === 10)) {
+			errors.push('Необходимо указать телефон');
+		}
+
+        this.events.emit('contacts:validated', { errors, valid: errors.length === 0 } as IFormState);
 	}
 }

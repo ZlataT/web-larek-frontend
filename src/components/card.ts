@@ -75,23 +75,20 @@ export class Card extends Component<IProduct> {
     set category(value: string) {
         this.setText(this._category, value);
         this.removeClass(this._category, 'card__category_soft');
+        this.removeClass(this._category, 'card__category_other');
         switch (value) {
             case 'софт-скил': {
                 this.addClass(this._category, 'card__category_soft');
                 break;
             }
-
             case 'другое': {
                 this.addClass(this._category, 'card__category_other');
-
                 break;
             }
-
             case 'дополнительное': {
                 this.addClass(this._category, 'card__category_additional');
                 break;
             }
-
             case 'кнопка': {
                 this.addClass(this._category, 'card__category_button');
                 break;
